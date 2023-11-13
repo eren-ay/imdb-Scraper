@@ -23,8 +23,8 @@ func main() {
 
 	startDate := ReleaseDate{
 		Year:  1950,
-		Month: 1,
-		Day:   1,
+		Month: 01,
+		Day:   01,
 	}
 	endDate := ReleaseDate{
 		Year:  2042,
