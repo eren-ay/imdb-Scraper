@@ -29,6 +29,7 @@ This Golang project involves web scraping IMDb to gather information about movie
 Ensure you have the following tools installed before running the project:
 
 - Golang (version 1.21.4)
+- Selenium and chromedriver 
 - Your preferred database system (e.g., SQLite, MySQL, MongoDB)
 
 

@@ -3,46 +3,32 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/tebeka/selenium"
-	"github.com/tebeka/selenium/chrome"
 )
 
 // define a custom data type for the scraped data
-type Product struct {
-	name, price string
+type Show struct {
+	id    string
+	title string
 }
 
 func main() {
 
-<<<<<<< HEAD
 	// where to store the scraped data
-	var products []Product
+	var Shows []Show
 
 	// initialize a Chrome browser instance on port 4444
 	service, err := selenium.NewChromeDriverService("./chromedriver", 4444)
 	if err != nil {
 		log.Fatal("Error:", err)
-=======
-	startDate := ReleaseDate{
-		Year:  1950,
-		Month: 01,
-		Day:   01,
-	}
-	endDate := ReleaseDate{
-		Year:  2042,
-		Month: 12,
-		Day:   31,
->>>>>>> e0ac3c764139b8ce716f83dfce4081333e524494
 	}
 
 	defer service.Stop()
 
 	// configure the browser options
 	caps := selenium.Capabilities{}
-	caps.AddChrome(chrome.Capabilities{Args: []string{
-		"--headless", // comment out this line for testing
-	}})
 
 	// create a new remote client with the specified options
 	driver, err := selenium.NewRemote(caps, "")
@@ -57,37 +43,59 @@ func main() {
 	}
 
 	// visit the target page
-	err = driver.Get("https://scrapingclub.com/exercise/list_infinite_scroll/")
+	err = driver.Get("https://www.imdb.com/search/title/?release_date=1960-01-01,2042-12-31&sort=release_date,asc/")
 	if err != nil {
 		log.Fatal("Error:", err)
 	}
 
+	showMoreBtn, err := driver.FindElement(selenium.ByCSSSelector, ".ipc-see-more__button")
+	if err != nil {
+		log.Fatal("Error:", err)
+	}
+
+	showMoreBtn.Click()
+	showMoreBtn.Click()
+	time.Sleep(10 * time.Second)
 	// select the product elements
-	productElements, err := driver.FindElements(selenium.ByCSSSelector, ".post")
+	showElements, err := driver.FindElements(selenium.ByCSSSelector, ".ipc-metadata-list-summary-item__c")
 	if err != nil {
 		log.Fatal("Error:", err)
 	}
 
 	// iterate over the product elements
 	// and extract data from them
-	for _, productElement := range productElements {
-		// select the name and price nodes
-		nameElement, err := productElement.FindElement(selenium.ByCSSSelector, "h4")
-		priceElement, err := productElement.FindElement(selenium.ByCSSSelector, "h5")
+	for _, showElement := range showElements {
+		nameElement, err := showElement.FindElement(selenium.ByCSSSelector, ".ipc-title-link-wrapper")
 
-		// extract the data of interest
+		link, err := nameElement.GetAttribute("href")
+		fmt.Printf("%s \n\n\n", link)
+		fmt.Printf("%s \n", parseLinkForId(link))
+
 		name, err := nameElement.Text()
-		price, err := priceElement.Text()
 		if err != nil {
 			log.Fatal("Error:", err)
 		}
 
 		// add the scraped data to the list
-		product := Product{}
-		product.name = name
-		product.price = price
-		products = append(products, product)
+		show := Show{}
+		show.title = name
+		Shows = append(Shows, show)
 	}
 
-	fmt.Println(products)
+	fmt.Println(Shows)
+}
+
+func parseLinkForId(link string) string {
+	id := ""
+	for i := 1; i < len(link); i++ {
+		if link[i] == '/' {
+			for j := i + 1; j < len(link); j++ {
+				if link[j] == '/' {
+					return id
+				}
+				id = id + string(link[j])
+			}
+		}
+	}
+	return ""
 }
