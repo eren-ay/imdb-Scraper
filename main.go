@@ -15,6 +15,7 @@ type Product struct {
 
 func main() {
 
+<<<<<<< HEAD
 	// where to store the scraped data
 	var products []Product
 
@@ -22,6 +23,17 @@ func main() {
 	service, err := selenium.NewChromeDriverService("./chromedriver", 4444)
 	if err != nil {
 		log.Fatal("Error:", err)
+=======
+	startDate := ReleaseDate{
+		Year:  1950,
+		Month: 01,
+		Day:   01,
+	}
+	endDate := ReleaseDate{
+		Year:  2042,
+		Month: 12,
+		Day:   31,
+>>>>>>> e0ac3c764139b8ce716f83dfce4081333e524494
 	}
 
 	defer service.Stop()
