@@ -2,80 +2,80 @@ package main
 
 import (
 	"fmt"
+	"log"
 
-	"github.com/gocolly/colly"
+	"github.com/tebeka/selenium"
+	"github.com/tebeka/selenium/chrome"
 )
 
-type ReleaseDate struct {
-	Year  int
-	Month int
-	Day   int
+// define a custom data type for the scraped data
+type Product struct {
+	name, price string
 }
-
-type Show struct {
-	imgSrc string
-	title  string
-}
-
-var url string = "imdb.com"
 
 func main() {
 
-	startDate := ReleaseDate{
-		Year:  1950,
-		Month: 1,
-		Day:   1,
-	}
-	endDate := ReleaseDate{
-		Year:  2042,
-		Month: 12,
-		Day:   31,
+	// where to store the scraped data
+	var products []Product
+
+	// initialize a Chrome browser instance on port 4444
+	service, err := selenium.NewChromeDriverService("./chromedriver", 4444)
+	if err != nil {
+		log.Fatal("Error:", err)
 	}
 
-	if searchByReleaseDate(startDate, endDate) {
-		fmt.Println("Hello, World!")
+	defer service.Stop()
+
+	// configure the browser options
+	caps := selenium.Capabilities{}
+	caps.AddChrome(chrome.Capabilities{Args: []string{
+		"--headless", // comment out this line for testing
+	}})
+
+	// create a new remote client with the specified options
+	driver, err := selenium.NewRemote(caps, "")
+	if err != nil {
+		log.Fatal("Error:", err)
 	}
 
-}
+	// maximize the current window to avoid responsive rendering
+	err = driver.MaximizeWindow("")
+	if err != nil {
+		log.Fatal("Error:", err)
+	}
 
-func searchByReleaseDate(startReleaseDate ReleaseDate, endReleaseDate ReleaseDate) bool {
+	// visit the target page
+	err = driver.Get("https://scrapingclub.com/exercise/list_infinite_scroll/")
+	if err != nil {
+		log.Fatal("Error:", err)
+	}
 
-	c := colly.NewCollector(
-		colly.AllowedDomains("imdb.com", "www.imdb.com"),
-	)
+	// select the product elements
+	productElements, err := driver.FindElements(selenium.ByCSSSelector, ".post")
+	if err != nil {
+		log.Fatal("Error:", err)
+	}
 
-	//for the show details page
-	//dataCollector := c.Clone()
+	// iterate over the product elements
+	// and extract data from them
+	for _, productElement := range productElements {
+		// select the name and price nodes
+		nameElement, err := productElement.FindElement(selenium.ByCSSSelector, "h4")
+		priceElement, err := productElement.FindElement(selenium.ByCSSSelector, "h5")
 
-	//each show one div and classname is = .mode-advanced
-	c.OnHTML(".mode-advanced", func(e *colly.HTMLElement) {
+		// extract the data of interest
+		name, err := nameElement.Text()
+		price, err := priceElement.Text()
+		if err != nil {
+			log.Fatal("Error:", err)
+		}
 
-		//showPageUrl := e.ChildAttr("div.lister-item-image > a", "href")
-		//showPageUrl = movie, anime or tvshow id  example = <a href="/title/tt4589218/?ref_=adv_li_i">…</a>
-		//showPageUrl = e.Request.AbsoluteURL(showPageUrl)
+		// add the scraped data to the list
+		product := Product{}
+		product.name = name
+		product.price = price
+		products = append(products, product)
+	}
 
-		// data collector visits showpage
-		// no need to visit show detail page ,necessary information is available on search page
-		//dataCollector.Visit(showPageUrl)
-
-		//image source
-
-		showImgSrc := e.ChildAttr("div.lister-item-image > a > img", "src")
-		showTitle := e.ChildText("div.lister-item-content > h3.lister-item-header > a")
-		tmpShow := Show{}
-		tmpShow.title = showTitle
-		tmpShow.imgSrc = showImgSrc
-		fmt.Printf("%s\n", tmpShow.title)
-	})
-	// going next page
-	/*c.OnHTML("a.lister-page-next", func(e *colly.HTMLElement) {
-		nextPage := e.Request.AbsoluteURL(e.Attr("href"))
-		c.Visit(nextPage)
-	})*/
-
-	startUrl := fmt.Sprintf("https://www.imdb.com/search/title/?release_date=%d-%d-%d,%d-%d-%d", startReleaseDate.Year, startReleaseDate.Month, startReleaseDate.Day, endReleaseDate.Year, endReleaseDate.Month, endReleaseDate.Day)
-	c.Visit(startUrl)
-
-	return true
-
+	fmt.Println(products)
 }
