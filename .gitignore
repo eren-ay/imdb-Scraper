@@ -21,3 +21,4 @@
 go.work
 Google-Chrome-for-Testing.app
 chromedriver
+.DS_Store
