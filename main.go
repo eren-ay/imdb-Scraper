@@ -3,21 +3,18 @@ package main
 import (
 	"fmt"
 	"log"
+	"scraper/imdb/models"
 	"time"
 
 	"github.com/tebeka/selenium"
 )
 
 // define a custom data type for the scraped data
-type Show struct {
-	id    string
-	title string
-}
 
 func main() {
 
 	// where to store the scraped data
-	var Shows []Show
+	var Shows []models.Show
 
 	// initialize a Chrome browser instance on port 4444
 	service, err := selenium.NewChromeDriverService("./chromedriver", 4444)
@@ -77,8 +74,9 @@ func main() {
 		}
 
 		// add the scraped data to the list
-		show := Show{}
-		show.title = name
+		show := models.Show{}
+		show.Title = name
+		show.ID = parseLinkForId(link)
 		Shows = append(Shows, show)
 	}
 
