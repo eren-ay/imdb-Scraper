@@ -4,10 +4,17 @@ import (
 	"fmt"
 	"log"
 	"scraper/imdb/models"
+	"scraper/imdb/pkg/database"
 	"time"
 
 	"github.com/tebeka/selenium"
 )
+
+type Date struct {
+	day   string
+	month string
+	year  string
+}
 
 // define a custom data type for the scraped data
 
@@ -40,21 +47,30 @@ func main() {
 	}
 
 	// visit the target page
-	err = driver.Get("https://www.imdb.com/search/title/?release_date=1960-01-01,2042-12-31&sort=release_date,asc/")
+	//https://www.imdb.com/search/title/?release_date=2023-01-01,2023-12-31&sort=release_date,asc
+	//https://www.imdb.com/search/title/?title_type=tv_series,feature,tv_movie,tv_miniseries&release_date=1961-01-01,1961-12-31&sort=release_date,asc&num_votes=1,
+	err = driver.Get("https://www.imdb.com/search/title/?title_type=tv_series,feature,tv_movie,tv_miniseries&release_date=1962-01-01,1964-12-31&sort=release_date,asc&num_votes=1,")
 	if err != nil {
 		log.Fatal("Error:", err)
 	}
+	//HoyXN
 
 	showMoreBtn, err := driver.FindElement(selenium.ByCSSSelector, ".ipc-see-more__button")
 	if err != nil {
 		log.Fatal("Error:", err)
 	}
 
+	for i := 0; i < 117; i++ {
+		showMoreBtn.Click()
+		showMoreBtn.Click()
+		time.Sleep(2 * time.Second)
+	}
 	showMoreBtn.Click()
 	showMoreBtn.Click()
-	time.Sleep(10 * time.Second)
+	time.Sleep(2 * time.Second)
 	// select the product elements
 	showElements, err := driver.FindElements(selenium.ByCSSSelector, ".ipc-metadata-list-summary-item__c")
+
 	if err != nil {
 		log.Fatal("Error:", err)
 	}
@@ -79,7 +95,7 @@ func main() {
 		show.ID = parseLinkForId(link)
 		Shows = append(Shows, show)
 	}
-
+	database.InsertCollection(database.DB, "Show", "Movie", Shows)
 	fmt.Println(Shows)
 }
 
