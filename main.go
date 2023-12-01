@@ -5,6 +5,7 @@ import (
 	"log"
 	"scraper/imdb/models"
 	"scraper/imdb/pkg/database"
+	"strings"
 	"time"
 
 	"github.com/tebeka/selenium"
@@ -49,7 +50,7 @@ func main() {
 	// visit the target page
 	//https://www.imdb.com/search/title/?release_date=2023-01-01,2023-12-31&sort=release_date,asc
 	//https://www.imdb.com/search/title/?title_type=tv_series,feature,tv_movie,tv_miniseries&release_date=1961-01-01,1961-12-31&sort=release_date,asc&num_votes=1,
-	err = driver.Get("https://www.imdb.com/search/title/?title_type=tv_series,feature,tv_movie,tv_miniseries&release_date=1962-01-01,1964-12-31&sort=release_date,asc&num_votes=1,")
+	err = driver.Get("https://www.imdb.com/search/title/?title_type=tv_series,feature,tv_movie,tv_miniseries&release_date=1963-01-01,1963-12-31&sort=release_date,asc&num_votes=1,")
 	if err != nil {
 		log.Fatal("Error:", err)
 	}
@@ -89,8 +90,10 @@ func main() {
 
 		// add the scraped data to the list
 		show := models.Show{}
-		// erenay this means nay
-		show.Title = name[3:]
+		// copy the name
+		parseIndex := strings.Index(name, ".")
+		// example name ="211. Hancock"
+		show.Title = name[parseIndex+2:]
 		show.ID = parseLinkForId(link)
 		Shows = append(Shows, show)
 	}
@@ -111,4 +114,8 @@ func parseLinkForId(link string) string {
 		}
 	}
 	return ""
+}
+
+func spotDotIndex() {
+	strings.Index(yazi, ".")
 }
