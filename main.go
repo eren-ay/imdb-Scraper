@@ -53,8 +53,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Error:", err)
 	}
-	//HoyXN
-
 	showMoreBtn, err := driver.FindElement(selenium.ByCSSSelector, ".ipc-see-more__button")
 	if err != nil {
 		log.Fatal("Error:", err)
@@ -91,7 +89,8 @@ func main() {
 
 		// add the scraped data to the list
 		show := models.Show{}
-		show.Title = name
+		// erenay this means nay
+		show.Title = name[3:]
 		show.ID = parseLinkForId(link)
 		Shows = append(Shows, show)
 	}

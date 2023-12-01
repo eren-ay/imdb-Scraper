@@ -20,7 +20,7 @@ This Golang project involves web scraping IMDb to gather information about movie
 ## To-Do
 
 - [ ] Implement error handling in web scraping.
-- [ ] Create a database
+- [✔️] Create a database
 - [ ] Add functionality to update the database with new movie data.
 - [ ] Write tests for the scraping and database modules.
 
@@ -30,6 +30,6 @@ Ensure you have the following tools installed before running the project:
 
 - Golang (version 1.21.4)
 - Selenium and chromedriver 
-- Your preferred database system (e.g., SQLite, MySQL, MongoDB)
+- MongoDB
 
 
