@@ -36,7 +36,7 @@ var DB *mongo.Client = ConnectDB()
 // getting database collections
 func GetCollection(client *mongo.Client, databaseName string, collectionName string) *mongo.Collection {
 	collection := client.Database(databaseName).Collection(collectionName)
-	println(collection)
+	//println(collection)
 	return collection
 }
 

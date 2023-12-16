@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"scraper/imdb/controllers/show"
 	"scraper/imdb/models"
 	"scraper/imdb/pkg/database"
-	"strings"
-	"time"
 
 	"github.com/tebeka/selenium"
 )
@@ -46,73 +44,17 @@ func main() {
 	if err != nil {
 		log.Fatal("Error:", err)
 	}
+	getAllShowFromScrape(driver, Shows)
 
-	// visit the target page
-	//https://www.imdb.com/search/title/?release_date=2023-01-01,2023-12-31&sort=release_date,asc
-	//https://www.imdb.com/search/title/?title_type=tv_series,feature,tv_movie,tv_miniseries&release_date=1961-01-01,1961-12-31&sort=release_date,asc&num_votes=1,
-	err = driver.Get("https://www.imdb.com/search/title/?title_type=tv_series,feature,tv_movie,tv_miniseries&release_date=1964-01-01,1970-12-31&sort=release_date,asc&num_votes=1,")
-	if err != nil {
-		log.Fatal("Error:", err)
-	}
-	time.Sleep(50 * time.Second)
-	showMoreBtn, err := driver.FindElement(selenium.ByCSSSelector, ".ipc-see-more__button")
-	if err != nil {
-		log.Fatal("Error:", err)
-	}
-
-	for i := 0; i < 335; i++ {
-		showMoreBtn.Click()
-		showMoreBtn.Click()
-		time.Sleep(3 * time.Second)
-	}
-	showMoreBtn.Click()
-	showMoreBtn.Click()
-	time.Sleep(5 * time.Second)
-	// select the product elements
-	showElements, err := driver.FindElements(selenium.ByCSSSelector, ".ipc-metadata-list-summary-item__c")
-
-	if err != nil {
-		log.Fatal("Error:", err)
-	}
-
-	// iterate over the product elements
-	// and extract data from them
-	for _, showElement := range showElements {
-		nameElement, err := showElement.FindElement(selenium.ByCSSSelector, ".ipc-title-link-wrapper")
-
-		link, err := nameElement.GetAttribute("href")
-		fmt.Printf("%s \n\n\n", link)
-		fmt.Printf("%s \n", parseLinkForId(link))
-
-		name, err := nameElement.Text()
-		if err != nil {
-			log.Fatal("Error:", err)
-		}
-
-		// add the scraped data to the list
-		show := models.Show{}
-		// copy the name
-		parseIndex := strings.Index(name, ".")
-		// example name ="211. Hancock"
-		show.Title = name[parseIndex+2:]
-		show.ID = parseLinkForId(link)
-		Shows = append(Shows, show)
-	}
-	database.InsertCollection(database.DB, "Show", "Movie", Shows)
-	//fmt.Println(Shows)
 }
 
-func parseLinkForId(link string) string {
-	id := ""
-	for i := 1; i < len(link); i++ {
-		if link[i] == '/' {
-			for j := i + 1; j < len(link); j++ {
-				if link[j] == '/' {
-					return id
-				}
-				id = id + string(link[j])
-			}
-		}
+func getAllShowFromScrape(driver selenium.WebDriver, Shows []models.Show) []models.Show {
+	Shows, err := show.ShowScraperByReleaseDate(driver, Shows)
+	if err != nil {
+		log.Fatal("Error:", err)
 	}
-	return ""
+
+	database.InsertCollection(database.DB, "Show", "Movie", Shows)
+	return Shows
+	//fmt.Println(Shows)
 }
