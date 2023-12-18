@@ -4,4 +4,5 @@ package models
 type Show struct {
 	ID    string `bson:"ID"`
 	Title string `bson:"Title"`
+	ShowDetails
 }
